@@ -1,6 +1,16 @@
-# Servlet Debug Practice (初学者向け)
+# Servlet Debug Practice (初学者向け / MVC版)
 
 このプロジェクトは「デバッグ練習専用」です。あえて初学者が起こしやすいミスを複数含めています。
+
+## 構成（MVC）
+
+- Controller: `src/main/java/com/example/debug/controller`
+- Service: `src/main/java/com/example/debug/service`
+- Model: `src/main/java/com/example/debug/model`
+- Repository: `src/main/java/com/example/debug/repository`
+- View (JSP): `src/main/webapp/WEB-INF/jsp`
+
+> JSP は `WEB-INF` 配下に置いており、URL 直アクセスでは表示できない構成です。
 
 ## 使い方
 
@@ -18,11 +28,11 @@ mvn clean package
 
 ## 含まれている典型ミス（例）
 
-- 文字列比較に `==` を使っている
-- 数値変換で入力値のバリデーションがない
-- `null` チェック不足
-- セッション属性の初期化漏れ
-- リスト要素アクセスの範囲外参照
+- 文字列比較に `==` を使っている（Repository）
+- 数値変換で入力値のバリデーションがない（Service）
+- `null` チェック不足（Controller / Service）
+- セッション属性 `visits` の初期化漏れ（Controller）
+- リスト要素アクセスの範囲外参照（Controller）
 - `web.xml` とアノテーション設定の不整合
 
 ## 目標

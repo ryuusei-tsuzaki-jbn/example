@@ -4,12 +4,12 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
          version="5.0">
 
-    <display-name>Servlet Debug Practice</display-name>
+    <display-name>Servlet Debug Practice MVC</display-name>
 
     <!-- annotationと重複するが、設定の混乱を再現するために残している -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>com.example.debug.LoginServlet</servlet-class>
+        <servlet-class>com.example.debug.controller.LoginServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
