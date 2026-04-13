@@ -158,3 +158,32 @@ mvn clean package
 - Eclipse Console の `Caused by:` から始まる3〜10行
 - `<workspace>/.metadata/.log` の該当スタックトレース
 - `<TOMCAT_HOME>/logs/catalina*.log` の該当箇所
+
+
+## 共有ログ（2026-04-13）からの一次診断
+
+あなたが共有してくれたログから、次は**問題なし**と判断できます。
+
+- Tomcat: `10.1.34`（OK）
+- Java: `17.0.13`（OK）
+- OS/アーキ: Windows 11 / amd64（OK）
+- `APR native library` のメッセージは **性能向上用ライブラリ未導入の通知**で、起動失敗の原因ではありません。
+
+つまり、今回の停止原因は高確率で **Webアプリのデプロイ/初期化時の例外** です。  
+`子コンテナーを開始できません` は要約メッセージなので、原因特定には次のログが必要です。
+
+- `C:\pleiades\2024-12\workspace\.metadata\.plugins\org.eclipse.wst.server.core\tmp2\logs\localhost*.log`
+- `C:\pleiades\2024-12\workspace\.metadata\.log`
+
+### まず試す設定リセット（3分）
+
+1. Eclipse `Servers` ビューで Tomcat を **Delete**（`Also remove server configuration` にチェック）
+2. `Project > Clean` を実行
+3. `Project > Maven > Update Project...`（`Force Update` ON）
+4. Tomcat 10.1 を再登録し、プロジェクトを Add
+5. 再起動
+
+### それでも落ちる場合（最有力）
+
+最初に出る `SEVERE` / `Caused by` の1ブロックを貼ってください。  
+この1ブロックがあれば、ほぼ1回で修正箇所を特定できます。
