@@ -98,3 +98,63 @@ mvn clean package
 - 再現手順を作る
 - 修正方針（最小変更 / 根本修正）を比較する
 - SQLの実行結果が要件と一致しているか検証する
+
+
+## Tomcat起動エラー（子コンテナーを開始できません）対策
+
+以下ログは**原因そのものではなく結果メッセージ**です。  
+```
+重大: 子コンテナーを開始できません。
+重大: 必要なサーバーコンポーネントを開始できないため、Tomcat を開始できませんでした。
+```
+
+まずは Eclipse の **Servers ビュー > Tomcat > Open Launch Configuration** と、
+`<workspace>/.metadata/.log` / `catalina.*.log` の **Caused by** を確認してください。
+
+### この構成で特に多い原因と対策
+
+1. **Tomcat 実行JREが Java 17 になっていない**
+   - 症状: `UnsupportedClassVersionError` が出る
+   - 対策:
+     - `Window > Preferences > Server > Runtime Environments > Apache Tomcat v10.1` の JRE を 17 に変更
+     - Serversビューの Tomcat を一度削除→再作成
+
+2. **Tomcat 10 と `javax.servlet` 系ライブラリの混在**
+   - 症状: `ClassNotFoundException` / `NoClassDefFoundError`（`javax.servlet.*`）
+   - 対策:
+     - このプロジェクトは `jakarta.servlet` 前提。独自に追加した `javax.servlet-api` を除去
+     - `WEB-INF/lib` に古い servlet 関連JARを入れない
+
+3. **8080ポート競合**
+   - 症状: `Address already in use: bind`
+   - 対策:
+     - Eclipseの Servers 設定で HTTP ポートを 8081 などに変更
+     - 既存Tomcat/別プロセス停止
+
+4. **Servers キャッシュ破損（Eclipse WTP）**
+   - 症状: 起動時に child container エラーのみ出て詳細が見えにくい
+   - 対策:
+     - Serversビューで対象Tomcatを `Clean...`
+     - `Project > Clean`
+     - 改善しない場合、Serversプロジェクトを再生成（Tomcat再追加）
+
+5. **DB起動前提の誤解**
+   - このサンプルは起動時ではなくリクエスト時にDB接続するため、通常はDB停止でもTomcat自体は起動可能
+   - ただし他コード追加で `init()` 中にDB接続した場合は起動失敗要因になる
+
+### 最短の復旧手順（おすすめ）
+
+1. Tomcat Runtime の JRE を **Java 17** に設定
+2. Servers の Tomcat を削除して再作成
+3. `Project Facets` を `Dynamic Web Module 5.0` / `Java 17` に再設定
+4. `Project > Maven > Update Project...` 実行
+5. `Project > Clean` と Servers の `Clean...` 実行
+6. 再起動し、まだ失敗する場合は **最初の Caused by 1行** を確認
+
+### 追加で貼ってほしいログ
+
+切り分けを正確にするため、次のいずれかを共有してください。
+
+- Eclipse Console の `Caused by:` から始まる3〜10行
+- `<workspace>/.metadata/.log` の該当スタックトレース
+- `<TOMCAT_HOME>/logs/catalina*.log` の該当箇所
