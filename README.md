@@ -50,6 +50,60 @@ psql -h localhost -p 5432 -U postgres -d postgres -f src/main/resources/db/schem
 psql -h localhost -p 5432 -U postgres -d postgres -f src/main/resources/db/seed.sql
 ```
 
+
+
+### psql に直接打ち込む手順（SQLコピペ用）
+
+1. まず接続
+
+```bash
+psql -h localhost -p 5432 -U postgres -d postgres
+```
+
+2. 以下をそのまま貼り付け（テーブル作成）
+
+```sql
+CREATE TABLE IF NOT EXISTS app_user (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    age INTEGER NOT NULL,
+    role VARCHAR(30) NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT true
+);
+```
+
+3. 続けて初期データ投入
+
+```sql
+INSERT INTO app_user (username, password, age, role, active) VALUES
+('alice', 'alice123', 20, 'USER', true),
+('bob', 'bob123', 17, 'USER', false),
+('admin', 'secret', 30, 'ADMIN', true)
+ON CONFLICT (username) DO NOTHING;
+```
+
+4. 投入確認
+
+```sql
+SELECT id, username, age, role, active FROM app_user ORDER BY id;
+```
+
+5. 終了
+
+```sql
+\q
+```
+
+### psql 接続で失敗したとき
+
+- `psql: error: connection to server ... failed`
+  - PostgreSQL が起動しているか確認（Dockerなら `docker ps`）
+- `FATAL: password authentication failed for user "postgres"`
+  - パスワードが `password` か確認
+- `FATAL: database "postgres" does not exist`
+  - DB名を作成するか、接続先を既存DBに変更
+
 ## Eclipse + Tomcat 10 での実行手順
 
 1. **Import**: `File > Import > Existing Maven Projects` でこのプロジェクトを読み込み
